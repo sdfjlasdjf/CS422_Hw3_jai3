@@ -1,0 +1,48 @@
+The first step would be to remove initialization to zero:
+rule <k> int Xs ; S => S </k>
+     <state> M </state> 
+  requires keys(M) >=Keys Xs
+
+Then we should handle uninitialized variables:
+rule <k> X => error ...</k>
+     <state> M </state>
+  requires notBool X in keys(M)
+
+Last we should update assigning rule:
+rule <k> X = I => . ...</k>
+     <state> M => M[X <- I] </state>
+
+So below would be the complete definition after modification:
+module IMP
+  imports INT
+  imports BOOL
+
+  syntax Exp ::= Int | Exp "+Int" Exp | Exp "-Int" Exp | Exp "*Int" Exp
+               | "true" | "false" | Exp "&&" Exp | Exp "||" Exp | "!" Exp
+  syntax Stmt ::= "skip"
+                | Id "=" Exp
+                | "if" "(" Exp ")" Stmt "else" Stmt
+                | "while" "(" Exp ")" Stmt
+                | "int" Ids ";" Stmt
+  syntax Ids ::= List{Id,","}
+
+  configuration <k> $PGM:Stmt </k>
+                <state> .Map </state>
+
+  rule <k> X = I => . ...</k>
+       <state> M => M[X <- I] </state>
+
+  rule <k> X => error ...</k>
+       <state> M </state>
+    requires notBool X in keys(M)
+
+  rule <k> int Xs ; S => S </k>
+       <state> M </state>
+    requires keys(M) >=Keys Xs
+
+  rule <k> if (true) S1 else S2 => S1 </k>
+  rule <k> if (false) S1 else S2 => S2 </k>
+
+  rule <k> while (B) S => if (B) {S while (B) S} else {} </k>
+
+endmodule
