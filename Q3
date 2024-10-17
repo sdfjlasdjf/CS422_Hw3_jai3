@@ -1,0 +1,46 @@
+module IMP
+  imports INT
+  imports BOOL
+
+  syntax Exp ::= Int | Exp "+Int" Exp | Exp "-Int" Exp | Exp "*Int" Exp
+               | "true" | "false" | Exp "&&" Exp | Exp "||" Exp | "!" Exp
+  syntax Stmt ::= "skip"
+                | Id "=" Exp
+                | "if" "(" Exp ")" Stmt "else" Stmt
+                | "while" "(" Exp ")" Stmt
+                | "int" Ids ";" Stmt
+                | Stmt ";" Stmt [seqstrict]
+  syntax Ids ::= List{Id,","}
+
+  // Define the Done category and include it in KResult
+  syntax Done ::= "{}"
+  syntax KResult ::= Done
+
+  configuration <k> $PGM:Stmt </k>
+                <state> .Map </state>
+
+  // Assignment rule
+  rule <k> X = I => {} </k>
+       <state> M => M[X <- I] </state>
+
+  // Variable lookup error if uninitialized
+  rule <k> X => error ...</k>
+       <state> M </state>
+    requires notBool X in keys(M)
+
+  // Variable declaration, no automatic initialization
+  rule <k> int Xs ; S => S </k>
+       <state> M </state>
+    requires keys(M) >=Keys Xs
+
+  // If-else rules
+  rule <k> if (true) S1 else S2 => S1 </k>
+  rule <k> if (false) S1 else S2 => S2 </k>
+
+  // While loop rule
+  rule <k> while (B) S => if (B) {S while (B) S} else {} </k>
+
+  // Skip reduces to {}
+  rule <k> skip => {} </k>
+
+endmodule
