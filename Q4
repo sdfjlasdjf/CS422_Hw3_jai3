@@ -1,0 +1,24 @@
+Substitution-based Definition:
+1.Defining callCC in terms of callcc:
+we can add a mechanism to discard any return from the evaluation of e that does not explicitly pass a value to the continuation k:
+syntax Exp ::= "callCC" Exp  [strict]
+rule <k> callCC E => callcc (lambda k . (E ~> k 0)) </k>
+
+2.Defining callcc in terms of callCC:
+We can modify callCC to ensure that if the expression completes normally, the original value is returned:
+syntax Exp ::= "callcc" Exp  [strict]
+rule <k> callcc E => callCC (lambda k . let x = E in (k x)) </k>
+
+
+
+Environment-based Definition:
+1.Defining callCC in terms of callcc:
+Just like the substitution-based approach, we wrap E with a dummy call k 0 that prevents it from continuing if no value is explicitly passed:
+syntax Exp ::= "callCC" Exp  [strict]
+rule <k> callCC E => callcc (lambda k . (E ~> k 0)) </k>
+
+2.Defining callcc in terms of callCC:
+Similar to the substitution-based approach, we evaluate E and ensure that the value is passed back if E completes normally:
+syntax Exp ::= "callcc" Exp  [strict]
+rule <k> callcc E => callCC (lambda k . let x = E in (k x)) </k>
+
