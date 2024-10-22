@@ -1,10 +1,10 @@
-We can follow the approach of using the Y combinator (a fixed-point combinator) to express mu:
+We can follow the approach of using the Y combinator to express mu:
 
 syntax Exp ::= "mu" Id "." Exp [macro]
 rule mu X . E => (lambda X . (E[X / (X X)])) (lambda X . (E[X / (X X)]))
 
-Where we translate mu X . E into an application of a lambda expression to itself, effectively capturing the fixed point of E
-With this new semantics of mu, the definition of letrec from Lesson 8 remains the same:
+where we translate mu X . E into an application of a lambda expression to itself, capturing the fixed point of E.
+With this new semantics of mu, the definition of letrec should remains the same:
 
 syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp [macro]
 rule letrec F X = E in E' => let F = mu F . lambda X . E in E'
