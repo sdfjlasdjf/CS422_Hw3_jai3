@@ -1,6 +1,3 @@
-We would need to discard the entire contents of the <threads> cell:
-  rule <k> abort; ~> _ => .K </k>
-       <threads> _ => .Bag </threads>
-
-where the <k> cell of the current thread contains abort;. Upon encountering abort;, the rule rewrites the computation to .K, which terminates the current thread's computation.
-Also, the <threads> cell is rewritten to .Bag, which effectively discards all existing threads.
+syntax Stmt ::= "abort" ";"
+rule <k> abort; => .K </k>
+     <threads> _ => .Bag </threads>
